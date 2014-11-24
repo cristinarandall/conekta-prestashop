@@ -453,7 +453,7 @@ class ConektaTarjeta extends PaymentModule
 
 			$output .= '
 				<fieldset>
-					<legend><img src="'.$this->_path.'img/checks-icon.gif" alt="" />'.$this->l('Confirmation').'</legend>
+					<legend>'.$this->l('Confirmation').'</legend>
 					<div class="form-group">
 						<div class="col-lg-9">
 							<div class="conf confirmation">'.$this->l('Settings successfully saved').'</div>
@@ -494,7 +494,7 @@ class ConektaTarjeta extends PaymentModule
 		$output .= '
 		<form action="'.Tools::safeOutput($_SERVER['REQUEST_URI']).'" method="post">
 			<fieldset class="conekta-settings">
-				<legend><img src="'.$this->_path.'img/technical-icon.gif" alt="" />'.$this->l('Settings').'</legend>
+				<legend>'.$this->l('Settings').'</legend>
 				<label>'.$this->l('Mode').'</label>
 				<input type="radio" name="conekta_mode" value="0"'.(!Configuration::get('CONEKTA_MODE') ? ' checked="checked"' : '').' /> Test
 				<input type="radio" name="conekta_mode" value="1"'.(Configuration::get('CONEKTA_MODE') ? ' checked="checked"' : '').' /> Live
