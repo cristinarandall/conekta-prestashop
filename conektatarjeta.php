@@ -1,5 +1,11 @@
 <?php
 
+/*
+ * Title   : Conekta Card Payment Gateway for Prestashop
+ * Author  : Conekta.io
+ * Url     : https://github.com/conekta/conekta-prestashop-tarjeta
+ */
+
 if (!defined('_PS_VERSION_'))
 	exit;
 
@@ -198,17 +204,7 @@ class ConektaTarjeta extends PaymentModule
 				$output .= '<b style="color: #CC0000;">'.$this->l('Warning:').'</b> '.$this->l('The customer paid using Conekta and an error occured (check details at the bottom of this page)');
 
 			$output .= '</div>';
-
-			$output .= "
-				<script>
-					$('#tabConekta a').click(function (e) {
-						e.preventDefault()
-						$(this).tab('show')
-					})
-				</script>";
-
 			$output .= '</div></div></div>';
-
 			return $output;
 		}
 	}
@@ -508,19 +504,19 @@ class ConektaTarjeta extends PaymentModule
 						<td align="center" valign="middle" colspan="2">
 							<table cellspacing="0" cellpadding="0" class="innerTable">
 								<tr>
-									<td align="right" valign="middle">'.$this->l('Test Publishable Key').'</td>
+									<td align="right" valign="middle">'.$this->l('Test Public Key').'</td>
 									<td align="left" valign="middle"><input type="text" name="conekta_public_key_test" value="'.Tools::safeOutput(Configuration::get('CONEKTA_PUBLIC_KEY_TEST')).'" /></td>
 									<td width="15"></td>
 									<td width="15" class="vertBorder"></td>
-									<td align="left" valign="middle">'.$this->l('Live Publishable Key').'</td>
+									<td align="left" valign="middle">'.$this->l('Live Public Key').'</td>
 									<td align="left" valign="middle"><input type="text" name="conekta_public_key_live" value="'.Tools::safeOutput(Configuration::get('CONEKTA_PUBLIC_KEY_LIVE')).'" /></td>
 								</tr>
 								<tr>
-									<td align="right" valign="middle">'.$this->l('Test Secret Key').'</td>
+									<td align="right" valign="middle">'.$this->l('Test Private Key').'</td>
 									<td align="left" valign="middle"><input type="password" name="conekta_private_key_test" value="'.Tools::safeOutput(Configuration::get('CONEKTA_PRIVATE_KEY_TEST')).'" /></td>
 									<td width="15"></td>
 									<td width="15" class="vertBorder"></td>
-									<td align="left" valign="middle">'.$this->l('Live Secret Key').'</td>
+									<td align="left" valign="middle">'.$this->l('Live Private Key').'</td>
 									<td align="left" valign="middle"><input type="password" name="conekta_private_key_live" value="'.Tools::safeOutput(Configuration::get('CONEKTA_PRIVATE_KEY_LIVE')).'" /></td>
 								</tr>
 							</table>
