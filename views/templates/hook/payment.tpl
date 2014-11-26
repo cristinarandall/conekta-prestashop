@@ -1,5 +1,5 @@
 <div class="payment_module" style="border: 1px solid #595A5E; padding: 0.6em; margin-left: 0.7em;">
-	<h3 class="conekta_title"><img alt="" src="{$module_dir|escape:'bellini':'UTF-8'}img/secure-icon.png" />{l s='Pago con tarjeta de créditos y débito' mod='conektatarjeta'}</h3>
+	<h3 class="conekta_title">{l s='Pago con tarjeta de créditos y débito' mod='conektatarjeta'}</h3>
 
 	{* Classic Credit card form *}
 	<div id="conekta-ajax-loader"><img src="{$module_dir|escape:'bellini':'UTF-8'}img/ajax-loader.gif" alt="" /> {l s='Transaction in progress, please wait.' mod='conektatarjeta'}</div>

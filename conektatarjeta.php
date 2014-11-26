@@ -119,7 +119,7 @@ class ConektaTarjeta extends PaymentModule
 	public function uninstall()
 	{
 		return parent::uninstall() && Configuration::deleteByName('CONEKTA_TARJETA_VERSION') && Configuration::deleteByName('CONEKTA_PUBLIC_KEY_TEST') && Configuration::deleteByName('CONEKTA_PUBLIC_KEY_LIVE')
-		&& Configuration::deleteByName('CONEKTA_MODE') && Configuration::deleteByName('CONEKTA_PRIVATE_KEY_TEST') && Configuration::deleteByName('CONEKTA_PRIVATE_KEY_LIVE') && Configuration::deleteByName('CONEKTA_PAYMENT_ORDER_STATUS') && Configuration::deleteByName('CONEKTA_WEBHOOK_TOKEN') && Configuration::deleteByName('CONEKTA_CHARGE_MODE') && Db::getInstance()->Execute('DROP TABLE `'._DB_PREFIX_.'conekta_customer`') && Db::getInstance()->Execute('DROP TABLE `'._DB_PREFIX_.'conekta_transaction`');
+		&& Configuration::deleteByName('CONEKTA_MODE') && Configuration::deleteByName('CONEKTA_PRIVATE_KEY_TEST') && Configuration::deleteByName('CONEKTA_PRIVATE_KEY_LIVE') && Configuration::deleteByName('CONEKTA_PAYMENT_ORDER_STATUS') && Configuration::deleteByName('CONEKTA_CHARGE_MODE') && Db::getInstance()->Execute('DROP TABLE `'._DB_PREFIX_.'conekta_customer`') && Db::getInstance()->Execute('DROP TABLE `'._DB_PREFIX_.'conekta_transaction`');
 	}
 
 	/**
@@ -470,7 +470,7 @@ class ConektaTarjeta extends PaymentModule
 		<link href="'.$this->_path.'css/conekta-prestashop-admin.css" rel="stylesheet" type="text/css" media="all" />
 		<div class="conekta-module-wrapper">
 			<fieldset>
-				<legend><img src="'.$this->_path.'img/checks-icon.gif" alt="" />'.$this->l('Technical Checks').'</legend>
+				<legend>'.$this->l('Technical Checks').'</legend>
 				<div class="'.($requirements['result'] ? 'conf">'.$this->l('All the checks were successfully performed. You can now configure and start using your module.') :
 				'warn">'.$this->l('Unfortunately, at least one issue is preventing you from using this module. Please fix the issue and reload this page.')).'</div>
 				<table cellspacing="0" cellpadding="0" class="conekta-technical">';
