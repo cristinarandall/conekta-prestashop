@@ -1,4 +1,4 @@
-<div class="payment_module" style="border: 1px solid #595A5E; padding: 0.6em; margin-left: 0.7em;">
+<div class="payment_module" >
 	<h3 class="conekta_title">{l s='Pago con tarjeta de créditos y débito' mod='conektatarjeta'}</h3>
 
 	{* Classic Credit card form *}

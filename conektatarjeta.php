@@ -197,7 +197,7 @@ class ConektaTarjeta extends PaymentModule
 					<b>'.$this->l('Status:').'</b> <span style="font-weight: bold; color: '.($conekta_transaction_details['status'] == 'paid' ? 'green;">'.$this->l('Paid') : '#CC0000;">'.$this->l('Unpaid')).'</span><br>'.
 					'<b>'.$this->l('Amount:').'</b> '.Tools::displayPrice($conekta_transaction_details['amount']).'<br>'.
 					'<b>'.$this->l('Processed on:').'</b> '.Tools::safeOutput($conekta_transaction_details['date_add']).'<br>'.
-					'<b>'.$this->l('Mode:').'</b> <span style="font-weight: bold; color: '.($conekta_transaction_details['mode'] == 'live' ? 'green;">'.$this->l('Live') : '#CC0000;">'.$this->l('Test (No payment has been processed and you will not receive funds for this transaction, until you enable the "Live" mode)')).'</span>
+					'<b>'.$this->l('Mode:').'</b> <span style="font-weight: bold; color: '.($conekta_transaction_details['mode'] == 'live' ? 'green;">'.$this->l('Live') : '#CC0000;">'.$this->l('Test (No payment has been processed and you will need to enable the "Live" mode)')).'</span>
 					</p>';
 			}
 			else
