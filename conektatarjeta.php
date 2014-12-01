@@ -104,7 +104,9 @@ class ConektaTarjeta extends PaymentModule
 			`currency` varchar(3) NOT NULL, 
 			`fee` decimal(10,2) NOT NULL,
 			`mode` enum(\'live\',\'test\') NOT NULL,
-			`date_add` datetime NOT NULL, 
+			`date_add` datetime NOT NULL,
+            `reference` varchar(30) NOT NULL,
+            `barcode` varchar(230) NOT NULL,
 			`captured` tinyint(1) NOT NULL DEFAULT \'1\',
 			PRIMARY KEY (`id_conekta_transaction`),
 			KEY `idx_transaction` (`type`,`id_order`,`status`))
