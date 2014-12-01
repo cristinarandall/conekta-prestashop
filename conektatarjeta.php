@@ -3,7 +3,7 @@
 /*
  * Title   : Conekta Card Payment Gateway for Prestashop
  * Author  : Conekta.io
- * Url     : https://github.com/conekta/conekta-prestashop-tarjeta
+ * Url     : https://www.conekta.io/es/docs/plugins/prestashop
  */
 
 if (!defined('_PS_VERSION_'))
@@ -119,7 +119,7 @@ class ConektaTarjeta extends PaymentModule
 	public function uninstall()
 	{
 		return parent::uninstall() && Configuration::deleteByName('CONEKTA_TARJETA_VERSION') && Configuration::deleteByName('CONEKTA_PUBLIC_KEY_TEST') && Configuration::deleteByName('CONEKTA_PUBLIC_KEY_LIVE')
-		&& Configuration::deleteByName('CONEKTA_MODE') && Configuration::deleteByName('CONEKTA_PRIVATE_KEY_TEST') && Configuration::deleteByName('CONEKTA_PRIVATE_KEY_LIVE') && Configuration::deleteByName('CONEKTA_PAYMENT_ORDER_STATUS') && Configuration::deleteByName('CONEKTA_CHARGE_MODE') && Db::getInstance()->Execute('DROP TABLE `'._DB_PREFIX_.'conekta_customer`') && Db::getInstance()->Execute('DROP TABLE `'._DB_PREFIX_.'conekta_transaction`');
+		&& Configuration::deleteByName('CONEKTA_MODE') && Configuration::deleteByName('CONEKTA_PRIVATE_KEY_TEST') && Configuration::deleteByName('CONEKTA_PRIVATE_KEY_LIVE') && Configuration::deleteByName('CONEKTA_PAYMENT_ORDER_STATUS') && Db::getInstance()->Execute('DROP TABLE `'._DB_PREFIX_.'conekta_customer`') && Db::getInstance()->Execute('DROP TABLE `'._DB_PREFIX_.'conekta_transaction`');
 	}
 
 	/**
@@ -334,7 +334,6 @@ class ConektaTarjeta extends PaymentModule
 			$this->l('Mode:').' '.($charge_response->livemode == 'true' ? $this->l('Live') : $this->l('Test'))."\n";
 			$this->validateOrder((int)$this->context->cart->id, (int)$order_status, ($charge_response->amount * 0.01), $this->displayName, $message, array(), null, false, $this->context->customer->secure_key);
 
-			// @since 1.5.0 Attach the CONEKTA Transaction ID to this Order
 			if (version_compare(_PS_VERSION_, '1.5', '>='))
 			{
 				$new_order = new Order((int)$this->currentOrder);
@@ -445,7 +444,6 @@ class ConektaTarjeta extends PaymentModule
 				'CONEKTA_PRIVATE_KEY_TEST' => rtrim(Tools::getValue('conekta_private_key_test')),
 				'CONEKTA_PRIVATE_KEY_LIVE' => rtrim(Tools::getValue('conekta_private_key_live')),
 				'CONEKTA_PAYMENT_ORDER_STATUS' => (int)Tools::getValue('conekta_payment_status'),
-				'CONEKTA_CHARGE_MODE' => Tools::getValue('conekta_charge_mode', 1),
 			);
 
 			foreach ($configuration_values as $configuration_key => $configuration_value)
