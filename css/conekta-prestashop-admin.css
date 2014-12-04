@@ -30,7 +30,7 @@ table.conekta-technical td { padding: 4px 0px; }
 fieldset.conekta-settings { width: 670px; float: left; margin-right: 20px; }
 table.conekta-settings label { float: none; padding-right: 0px; text-align: right; width: auto; }
 table.conekta-settings { margin: 0px; }
-table.conekta-settings td { border-bottom: #CCCED7 solid 1px; padding: 8px; }
+table.conekta-settings td { padding: 8px; }
 table.conekta-settings td.td-right { color: #7F7F7F; font-size: 0.9em; }
 table.conekta-settings td.td-noborder { border-bottom: none; }
 table.conekta-settings td.save { text-align: center; padding-top: 15px; }

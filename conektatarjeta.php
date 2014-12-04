@@ -19,14 +19,11 @@ class ConektaTarjeta extends PaymentModule
 		$this->tab = 'payments_gateways';
 		$this->version = '0.1';
 		$this->author = 'Conekta.io';
-
 		parent::__construct();
-
 		$this->displayName = $this->l('Conekta Tarjeta');
 		$this->description = $this->l('Accept payments by Credit and Debit Card with Conekta (Visa, Mastercard, Amex)');
 		$this->confirmUninstall = $this->l('Warning: all the Conekta transaction details  in your database will be deleted. Are you sure you want uninstall this module?');
-
-		$this->backward_error = $this->l('In order to work properly in PrestaShop v1.4, the Conekta module requires backward compatibility module of at least v0.4.').'<br />'.
+		$this->backward_error = $this->l('In order to work correctly in PrestaShop v1.4, the Conekta module requires backward compatibility module of at least v0.4.').'<br />'.
 			$this->l('You can download this module here: http://addons.prestashop.com/en/modules-prestashop/6222-backwardcompatibility.html');
 
 		if (version_compare(_PS_VERSION_, '1.5', '<'))
@@ -36,7 +33,6 @@ class ConektaTarjeta extends PaymentModule
 		}
 		else
 			$this->backward = true;
-
 	}
 
 	/**
@@ -105,8 +101,8 @@ class ConektaTarjeta extends PaymentModule
 			`fee` decimal(10,2) NOT NULL,
 			`mode` enum(\'live\',\'test\') NOT NULL,
 			`date_add` datetime NOT NULL,
-            `reference` varchar(30) NOT NULL,
-            `barcode` varchar(230) NOT NULL,
+            		`reference` varchar(30) NOT NULL,
+            		`barcode` varchar(230) NOT NULL,
 			`captured` tinyint(1) NOT NULL DEFAULT \'1\',
 			PRIMARY KEY (`id_conekta_transaction`),
 			KEY `idx_transaction` (`type`,`id_order`,`status`))
@@ -133,14 +129,11 @@ class ConektaTarjeta extends PaymentModule
 		/* If 1.4 and no backward, then leave */
 		if (!$this->backward)
 			return;
-
 		if (!$this->checkSettings())
 			return;
-
 		if (Tools::getValue('controller') != 'order-opc' && (!($_SERVER['PHP_SELF'] == __PS_BASE_URI__.'order.php' || $_SERVER['PHP_SELF'] == __PS_BASE_URI__.'order-opc.php' || Tools::getValue('controller') == 'order' || Tools::getValue('controller') == 'orderopc' || Tools::getValue('step') == 3)))
 			return;
 		$this->context->controller->addCSS($this->_path.'css/conekta-prestashop.css');
-
 		return '
 		<script type="text/javascript" src="https://conektaapi.s3.amazonaws.com/v0.3.2/js/conekta.js"></script>
 		<script type="text/javascript">
@@ -159,13 +152,9 @@ class ConektaTarjeta extends PaymentModule
 		/* If 1.4 and no backward then leave */
 		if (!$this->backward)
 			return;
-
 		if (!$this->checkSettings())
 			return;
-		
-		$this->smarty->assign('conekta_ps_version', _PS_VERSION_);
-
-		return '<script type="text/javascript"> var conekta_secure_key = \''.addslashes($this->context->customer->secure_key).'\' </script> <div class="conekta-payment-errors”> '. $_GET["message"] .' </div> '. $this->fetchTemplate('payment.tpl');
+		return '<div class="conekta-payment-errors”> '. $_GET["message"] .' </div> '. $this->fetchTemplate('payment.tpl');
 	}
 
 	public function hookAdminOrder($params)
@@ -178,7 +167,6 @@ class ConektaTarjeta extends PaymentModule
 		if (Db::getInstance()->getValue('SELECT module FROM '._DB_PREFIX_.'orders WHERE id_order = '.(int)$id_order) == $this->name)
 		{
 			$conekta_transaction_details = Db::getInstance()->getRow('SELECT * FROM '._DB_PREFIX_.'conekta_transaction WHERE id_order = '.(int)$id_order.' AND type = \'payment\' AND status = \'paid\'');
-            
 			$output = '<div class="col-lg-12"><div class="panel"><h3><i class="icon-money"></i> '.$this->l('Conekta Payment Details').'</h3>';
 			$output .= '
 				<ul class="nav nav-tabs" id="tabConekta">
@@ -221,16 +209,12 @@ class ConektaTarjeta extends PaymentModule
 		//do not use this function for PS v1.6+
 		if (version_compare(_PS_VERSION_, 1.6, '>='))
 			return;
-
 		/* If 1.4 and no backward, then leave */
 		if (!$this->backward)
 			return;
-
 		if (!Tools::getIsset('vieworder') || !Tools::getIsset('id_order'))
 			return;
-
 		$id_order=(int)Tools::getValue('id_order');
-
 		if (Db::getInstance()->getValue('SELECT module FROM '._DB_PREFIX_.'orders WHERE id_order = '.(int)$id_order) == $this->name)
 		{
 			$conekta_transaction_details = Db::getInstance()->getRow('SELECT * FROM '._DB_PREFIX_.'conekta_transaction WHERE id_order = '.(int)$id_order.' AND type = \'payment\' AND status = \'paid\'');
@@ -251,9 +235,6 @@ class ConektaTarjeta extends PaymentModule
 				$output .= '<b style="color: #CC0000;">'.$this->l('Warning:').'</b> '.$this->l('The customer paid using Conekta and an error occured (check details at the bottom of this page)');
 
 			$order = new Order((int)$id_order);
-			$currency = new Currency($order->id_currency);
-			$symbol = $currency->getSign();
-
 			return $output;
 		}
 	}
@@ -269,19 +250,12 @@ class ConektaTarjeta extends PaymentModule
 			return;
 
 		$state = $params['objOrder']->getCurrentState();
-		
 		if ($params['objOrder'] && Validate::isLoadedObject($params['objOrder']) && isset($params['objOrder']->valid))
 			$this->smarty->assign('conekta_order', array('reference' => isset($params['objOrder']->reference) ? $params['objOrder']->reference : '#'.sprintf('%06d', $params['objOrder']->id),
 				'valid' => $params['objOrder']->valid));
 
-		if ($state == Configuration::get('PS_OS_OUTOFSTOCK'))
-			$this->smarty->assign('os_back_ordered', true);
-		else
-			$this->smarty->assign('os_back_ordered', false);
-
 		$currentOrderStatus = (int)$params['objOrder']->getCurrentState();
-        $this->smarty->assign('order_pending', false);
-
+        	$this->smarty->assign('order_pending', false);
 		return $this->fetchTemplate('order-confirmation.tpl');
 	}
 
@@ -300,7 +274,6 @@ class ConektaTarjeta extends PaymentModule
 		{
 			if (version_compare(_PS_VERSION_, '1.4.0.3', '>') && class_exists('Logger'))
 				Logger::addLog($this->l('Conekta - Payment transaction failed.').' Message: A valid Conekta token was not provided', 3, null, 'Cart', (int)$this->context->cart->id, true);
-
 			$controller = Configuration::get('PS_ORDER_PROCESS_TYPE') ? 'order-opc.php' : 'order.php';
 			$location = $this->context->link->getPageLink($controller, true).(strpos($controller, '?') !== false ? '&' : '?').'step=3&conekta_error=1#conekta_error';
 			Tools::redirectLink($location);
@@ -315,8 +288,8 @@ class ConektaTarjeta extends PaymentModule
 		{
 			$charge_details = array(
 				'amount' => $this->context->cart->getOrderTotal() * 100,
-                'reference_id'=>(int)$this->context->cart->id,
-                'card'=> $token,
+                		'reference_id'=>(int)$this->context->cart->id,
+                		'card'=> $token,
 				'currency' => $this->context->currency->iso_code,
 				'description' => $this->l('PrestaShop Customer ID:').' '.(int)$this->context->cookie->id_customer.' - '.$this->l('PrestaShop Cart ID:').' '.(int)$this->context->cart->id
 				);
@@ -324,7 +297,6 @@ class ConektaTarjeta extends PaymentModule
 			$charge_mode=true;
 			$charge_details['capture'] = $charge_mode;
 			$charge_response=Conekta_Charge::create($charge_details);
-
 			$result_json = Tools::jsonDecode($charge_response);
 			$order_status = (int)Configuration::get('CONEKTA_PAYMENT_ORDER_STATUS');
 			$message = $this->l('Conekta Transaction Details:')."\n\n".
@@ -428,7 +400,6 @@ class ConektaTarjeta extends PaymentModule
 		// If 1.4 and no backward, then leave
 		if (!$this->backward)
 			return false;
-
 		$output = '';
 		if (version_compare(_PS_VERSION_, '1.5', '>'))
 			$this->context->controller->addJQueryPlugin('fancybox');
@@ -507,7 +478,7 @@ class ConektaTarjeta extends PaymentModule
 									<td align="right" valign="middle">'.$this->l('Test Public Key').'</td>
 									<td align="left" valign="middle"><input type="text" name="conekta_public_key_test" value="'.Tools::safeOutput(Configuration::get('CONEKTA_PUBLIC_KEY_TEST')).'" /></td>
 									<td width="15"></td>
-									<td width="15" class="vertBorder"></td>
+									<td width="15"></td>
 									<td align="left" valign="middle">'.$this->l('Live Public Key').'</td>
 									<td align="left" valign="middle"><input type="text" name="conekta_public_key_live" value="'.Tools::safeOutput(Configuration::get('CONEKTA_PUBLIC_KEY_LIVE')).'" /></td>
 								</tr>
@@ -515,7 +486,7 @@ class ConektaTarjeta extends PaymentModule
 									<td align="right" valign="middle">'.$this->l('Test Private Key').'</td>
 									<td align="left" valign="middle"><input type="password" name="conekta_private_key_test" value="'.Tools::safeOutput(Configuration::get('CONEKTA_PRIVATE_KEY_TEST')).'" /></td>
 									<td width="15"></td>
-									<td width="15" class="vertBorder"></td>
+									<td width="15"></td>
 									<td align="left" valign="middle">'.$this->l('Live Private Key').'</td>
 									<td align="left" valign="middle"><input type="password" name="conekta_private_key_live" value="'.Tools::safeOutput(Configuration::get('CONEKTA_PRIVATE_KEY_LIVE')).'" /></td>
 								</tr>

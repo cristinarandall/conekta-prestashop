@@ -1,4 +1,4 @@
-{if $conekta_order.valid == 1 || $os_back_ordered}
+{if $conekta_order.valid == 1 }
 	<div class="conf confirmation">{l s='Pago Exitoso, el pago ha sido aprobado y el pedido se ha guardado con la referencia ' mod='conektatarjeta'} <b>{$conekta_order.reference|escape:html:'UTF-8'}</b>.</div>
 {else}
 	{if $order_pending}
