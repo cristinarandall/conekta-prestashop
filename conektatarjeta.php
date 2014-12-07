@@ -25,7 +25,6 @@ class ConektaTarjeta extends PaymentModule
 		$this->confirmUninstall = $this->l('Warning: all the Conekta transaction details  in your database will be deleted. Are you sure you want uninstall this module?');
 		$this->backward_error = $this->l('In order to work correctly in PrestaShop v1.4, the Conekta module requires backward compatibility module of at least v0.4.').'<br />'.
 			$this->l('You can download this module here: http://addons.prestashop.com/en/modules-prestashop/6222-backwardcompatibility.html');
-
 		if (version_compare(_PS_VERSION_, '1.5', '<'))
 		{
 			require(_PS_MODULE_DIR_.$this->name.'/backward_compatibility/backward.php');
@@ -206,10 +205,8 @@ class ConektaTarjeta extends PaymentModule
 	 */
 	public function hookBackOfficeHeader()
 	{
-		//do not use this function for PS v1.6+
 		if (version_compare(_PS_VERSION_, 1.6, '>='))
 			return;
-		/* If 1.4 and no backward, then leave */
 		if (!$this->backward)
 			return;
 		if (!Tools::getIsset('vieworder') || !Tools::getIsset('id_order'))
@@ -241,7 +238,7 @@ class ConektaTarjeta extends PaymentModule
 	
 	/**
 	 * Display a confirmation message after an order has been placed
-	 * To Do: add more complete information to show to user
+	 * To Do: add more complete information to show to user, add print button
 	 * @param array Hook parameters
 	 */
 	public function hookPaymentReturn($params)
@@ -253,11 +250,62 @@ class ConektaTarjeta extends PaymentModule
 		if ($params['objOrder'] && Validate::isLoadedObject($params['objOrder']) && isset($params['objOrder']->valid))
 			$this->smarty->assign('conekta_order', array('reference' => isset($params['objOrder']->reference) ? $params['objOrder']->reference : '#'.sprintf('%06d', $params['objOrder']->id),
 				'valid' => $params['objOrder']->valid));
-
 		$currentOrderStatus = (int)$params['objOrder']->getCurrentState();
-        	$this->smarty->assign('order_pending', false);
 		return $this->fetchTemplate('order-confirmation.tpl');
 	}
+
+    	/**
+     	* Build the line items hash
+     	* @param array $items
+     	*/
+    	public function build_line_items($items)
+    	{
+         	$line_items = array();
+        	foreach ($items as $item) {
+            		$line_items = array_merge($line_items, array(array(
+                                                               //'name' => $item['name'],
+                                                               'unit_price' => floatval($item['price']) * 100,
+                                                              // 'description' =>$item['name'],
+                                                               'quantity' =>$item['cart_quantity']
+                                                              // 'sku' =>$sku,
+                                                              // 'type' => $item['type']
+                                                               ))
+                                      );
+        			}
+        return $line_items;
+        
+    	}
+
+        /**
+         * Build details hash to send Conekta all the information available
+         *
+         * @param array 
+         */
+
+    	public function build_details($cart)
+    	{
+
+		/*
+		$customer = new Customer((int)$cart->id_customer);
+		$address_delivery = new Address((int)$cart->id_address_delivery);
+        	$details = array();
+        	$details = array(
+                         "email" => $customer->email,
+                         "name" => $customer->lastname,
+                         "line_items"  => $line_items,
+                         "billing_address"  => array(
+                                                     "street1" => $address_delivery->address1,
+                                                     "zip" => $address_delivery->postcode,
+                                                     "city" => $address_delivery->city,
+                                                     "phone" => $address_delivery->phone
+                                                     //"state" => $data['card']['address_state']
+                                                     )
+                         );*/
+                $details = array();
+        return $details;
+        
+    	}
+
 
 	/**
 	 * Process a payment, where the magic happens
@@ -283,13 +331,54 @@ class ConektaTarjeta extends PaymentModule
 		Conekta::setApiKey(Configuration::get('CONEKTA_MODE') ? Configuration::get('CONEKTA_PRIVATE_KEY_LIVE') : Configuration::get('CONEKTA_PRIVATE_KEY_TEST'));
 		$conekta_customer_exists = false;
 
-		//to do: add details and line_items
+        $cart = $this->context->cart;
+        $customer = new Customer((int)$cart->id_customer);
+        $address_delivery = new Address((int)$cart->id_address_delivery);
+        $address_fiscal = new Address((int)$cart->id_address_invoice);
+	$country = $cart->country->id_zone;
+
+		$items = $cart->getProducts();
+		$line_items = array();
+                foreach ($items as $item) {
+                        $line_items = array_merge($line_items, array(array(
+                                                               'name' => $item['name'],
+                                                               'unit_price' => floatval($item['price']) * 100,
+                                                               'description' =>$item['description_short'],
+                                                               'quantity' =>$item['cart_quantity'],
+                                                               'sku' =>$item['reference'],
+                                                                'type' => "producto"
+                                                               ))
+                                      );
+                                }
+		//to do: add line_items
 		try
 		{
 			$charge_details = array(
 				'amount' => $this->context->cart->getOrderTotal() * 100,
                 		'reference_id'=>(int)$this->context->cart->id,
                 		'card'=> $token,
+                        	'details'=> array(
+                                        "email" => $customer->email,
+                                        "phone" => $address_delivery->phone,
+                                        "name" => $customer->firstname . " " . $customer->lastname,
+                                         "line_items" =>$line_items,
+                                        "shipment"  => array(
+								"address"=> array(
+                                                                    "street1" => $address_delivery->address1,
+                                                                    "zip" => $address_delivery->postcode,
+                                                                    "state"=> State::getNameById($address_delivery->id_state),
+                                                                    "city" => $address_delivery->city
+                                                                     )             
+							    ),
+                                        "billing_address"  => array(
+                                                                    "street1" => $address_fiscal->address1,
+                                                                    "zip" => $address_fiscal->postcode,
+							            "company_name"=> $address_fiscal->company,
+                                                                    "phone"=> $address_fiscal->phone,
+                                                                    "state"=> State::getNameById($address_fiscal->id_state),
+                                                                    "city" => $address_fiscal->city,
+                                                                                  )
+                                                      ),
 				'currency' => $this->context->currency->iso_code,
 				'description' => $this->l('PrestaShop Customer ID:').' '.(int)$this->context->cookie->id_customer.' - '.$this->l('PrestaShop Cart ID:').' '.(int)$this->context->cart->id
 				);

@@ -3,7 +3,7 @@
 
 	<div id="conekta-ajax-loader"><img src="{$module_dir|escape:'bellini':'UTF-8'}img/ajax-loader.gif" alt="" /> {l s='Transaction in progress, please wait.' mod='conektatarjeta'}</div>
 
-	<form data-ajax="false" action="{$module_dir}charge.php" method="POST" id="conekta-payment-form"{if isset($conekta_save_tokens_ask) && $conekta_save_tokens_ask && isset($conekta_credit_cards)} style="display: none;"{/if}>
+	<form data-ajax="false" action="{$module_dir}charge.php" method="POST" id="conekta-payment-form">
 		{if isset($smarty.get.conekta_error)}<a id="conekta_error" name="conekta_error"></a><div class="conekta-payment-errors">{l s='There was a problem processing your credit card, please double check your data and try again.' mod='conektatarjeta'}</div>{/if}
 		<div class="conekta-card-deleted"></div>
 
@@ -24,8 +24,6 @@
 		<label>{l s='Fecha de Expiración (MM/YYYY)' mod='conektatarjeta'}</label><br />
 {* use this if the merchant would like the months to be names	*}
 		{html_select_date month_extra='id="conekta-card-expiry-month" class="conekta-card-expiry-month" data-conekta="card[exp_month]" data-encrypted-name="month"' data-conekta="card[exp_year]" year_extra='id="conekta-card-expiry-year" class="conekta-card-expiry-year" data-encrypted-name="year"' display_days=false end_year="+10"}
-{* use this if the merchant would like the months to be numbers	*}
-{*		{html_select_date month_format='%m' month_extra='id="conekta-card-expiry-month" class="conekta-card-expiry-month" data-conekta="card[exp_month]" data-encrypted-name="month"' data-conekta="card[exp_year]" year_extra='id="conekta-card-expiry-year" class="conekta-card-expiry-year" data-encrypted-name="year"' display_days=false end_year="+10"}	*}
 
 		<br />
 
