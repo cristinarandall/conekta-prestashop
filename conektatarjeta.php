@@ -22,12 +22,12 @@ class ConektaTarjeta extends PaymentModule
 		parent::__construct();
 		$this->displayName = $this->l('Conekta Tarjeta');
 		$this->description = $this->l('Accept payments by Credit and Debit Card with Conekta (Visa, Mastercard, Amex)');
-		$this->confirmUninstall = $this->l('Warning: all the Conekta transaction details  in your database will be deleted. Are you sure you want uninstall this module?');
-		$this->backward_error = $this->l('In order to work correctly in PrestaShop v1.4, the Conekta module requires backward compatibility module of at least v0.4.').'<br />'.
-			$this->l('You can download this module here: http://addons.prestashop.com/en/modules-prestashop/6222-backwardcompatibility.html');
+		$this->confirmUninstall = $this->l('Warning: all the Conekta transaction details in your database will be deleted. Are you sure you want uninstall this module?');
+		$this->backward_error = $this->l('In order to work correctly in PrestaShop v1.4, this module requires backward compatibility module of at least v0.4.').'<br />'.
+			$this->l('You can download the requirements needed here: http://addons.prestashop.com/en/modules-prestashop/6222-backwardcompatibility.html');
 		if (version_compare(_PS_VERSION_, '1.5', '<'))
 		{
-			require(_PS_MODULE_DIR_.$this->name.'/backward_compatibility/backward.php');
+			require(_PS_MODULE_DIR_.$this->name.'/compatibility/backward.php');
 			$this->backward = true;
 		}
 		else
@@ -223,10 +223,8 @@ class ConektaTarjeta extends PaymentModule
 			if (isset($conekta_transaction_details['id_transaction']))
 				$output .= $this->l('Conekta Transaction ID:').' '.Tools::safeOutput($conekta_transaction_details['id_transaction']).'<br /><br />'.
 				$this->l('Status:').' <span style="font-weight: bold; color: '.($conekta_transaction_details['status'] == 'paid' ? 'green;">'.$this->l('Paid') : '#CC0000;">'.$this->l('Unpaid')).'</span><br />'.
-				$this->l('Captured:').' <span style="font-weight: bold; color: '.($conekta_transaction_details['captured'] == '1' ? 'green;">'.$this->l('Yes') : '#CC0000;">'.$this->l('No')).'</span><br />'.
 				$this->l('Amount:').' '.Tools::displayPrice($conekta_transaction_details['amount']).'<br />'.
 				$this->l('Processed on:').' '.Tools::safeOutput($conekta_transaction_details['date_add']).'<br />'.
-				$this->l('Processing Fee:').' '.Tools::displayPrice($conekta_transaction_details['fee']).'<br /><br />'.
 				$this->l('Mode:').' <span style="font-weight: bold; color: '.($conekta_transaction_details['mode'] == 'live' ? 'green;">'.$this->l('Live') : '#CC0000;">'.$this->l('Test (You will not receive any payment, until you enable the "Live" mode)')).'</span>';
 			else
 				$output .= '<b style="color: #CC0000;">'.$this->l('Warning:').'</b> '.$this->l('The customer paid using Conekta and an error occured (check details at the bottom of this page)');
@@ -363,7 +361,7 @@ class ConektaTarjeta extends PaymentModule
                                         "name" => $customer->firstname . " " . $customer->lastname,
                                          "line_items" =>$line_items,
                                         "shipment"  => array(
-								"address"=> array(
+                                                             "address"=> array(
                                                                     "street1" => $address_delivery->address1,
                                                                     "zip" => $address_delivery->postcode,
                                                                     "state"=> State::getNameById($address_delivery->id_state),
@@ -465,7 +463,7 @@ class ConektaTarjeta extends PaymentModule
 		if (Configuration::get('CONEKTA_MODE'))
 			$tests['ssl'] = array('name' => $this->l('SSL must be enabled on your store (before entering Live mode)'), 'result' => Configuration::get('PS_SSL_ENABLED') || (!empty($_SERVER['HTTPS']) && Tools::strtolower($_SERVER['HTTPS']) != 'off'));
 		$tests['php52'] = array('name' => $this->l('Your server must run PHP 5.2 or greater'), 'result' => version_compare(PHP_VERSION, '5.2.0', '>='));
-		$tests['configuration'] = array('name' => $this->l('You must sign-up for CONEKTA and configure your account settings in the module (publishable key, secret key...etc.)'), 'result' => $this->checkSettings());
+		$tests['configuration'] = array('name' => $this->l('You must sign-up for CONEKTA and configure your account settings in the module'), 'result' => $this->checkSettings());
 
 		if (version_compare(_PS_VERSION_, '1.5', '<'))
 		{
@@ -513,10 +511,10 @@ class ConektaTarjeta extends PaymentModule
 
 			$output .= '
 				<fieldset>
-					<legend>'.$this->l('Confirmation').'</legend>
+					<legend>Confirmation</legend>
 					<div class="form-group">
 						<div class="col-lg-9">
-							<div class="conf confirmation">'.$this->l('Settings successfully saved').'</div>
+							<div class="conf confirmation">Settings successfully saved</div>
 						</div>
 					</div>
 				</fieldset>
@@ -530,8 +528,8 @@ class ConektaTarjeta extends PaymentModule
 		<link href="'.$this->_path.'css/conekta-prestashop-admin.css" rel="stylesheet" type="text/css" media="all" />
 		<div class="conekta-module-wrapper">
 			<fieldset>
-				<legend>'.$this->l('Technical Checks').'</legend>
-				<div class="'.($requirements['result'] ? 'conf">'.$this->l('All the checks were successfully performed. You can now configure and start using your module.') :
+				<legend>Technical Checks</legend>
+				<div class="'.($requirements['result'] ? 'conf">'.$this->l('All the checks were successfully performed. You can now start using your module.') :
 				'warn">'.$this->l('Unfortunately, at least one issue is preventing you from using this module. Please fix the issue and reload this page.')).'</div>
 				<table cellspacing="0" cellpadding="0" class="conekta-technical">';
 				foreach ($requirements as $k => $requirement)
@@ -546,7 +544,6 @@ class ConektaTarjeta extends PaymentModule
 			</fieldset>
 		<br />';
 
-		/* If 1.4 and no backward, then leave */
 		if (!$this->backward)
 			return $output;
 
@@ -554,8 +551,8 @@ class ConektaTarjeta extends PaymentModule
 		$output .= '
 		<form action="'.Tools::safeOutput($_SERVER['REQUEST_URI']).'" method="post">
 			<fieldset class="conekta-settings">
-				<legend>'.$this->l('Settings').'</legend>
-				<label>'.$this->l('Mode').'</label>
+				<legend>Settings</legend>
+				<label>Mode</label>
 				<input type="radio" name="conekta_mode" value="0"'.(!Configuration::get('CONEKTA_MODE') ? ' checked="checked"' : '').' /> Test
 				<input type="radio" name="conekta_mode" value="1"'.(Configuration::get('CONEKTA_MODE') ? ' checked="checked"' : '').' /> Live
 				<br /><br />
@@ -564,19 +561,19 @@ class ConektaTarjeta extends PaymentModule
 						<td align="center" valign="middle" colspan="2">
 							<table cellspacing="0" cellpadding="0" class="innerTable">
 								<tr>
-									<td align="right" valign="middle">'.$this->l('Test Public Key').'</td>
+									<td align="right" valign="middle"> Test Public Key </td>
 									<td align="left" valign="middle"><input type="text" name="conekta_public_key_test" value="'.Tools::safeOutput(Configuration::get('CONEKTA_PUBLIC_KEY_TEST')).'" /></td>
 									<td width="15"></td>
 									<td width="15"></td>
-									<td align="left" valign="middle">'.$this->l('Live Public Key').'</td>
+									<td align="left" valign="middle"> Live Public Key </td>
 									<td align="left" valign="middle"><input type="text" name="conekta_public_key_live" value="'.Tools::safeOutput(Configuration::get('CONEKTA_PUBLIC_KEY_LIVE')).'" /></td>
 								</tr>
 								<tr>
-									<td align="right" valign="middle">'.$this->l('Test Private Key').'</td>
+									<td align="right" valign="middle"> Test Private Key </td>
 									<td align="left" valign="middle"><input type="password" name="conekta_private_key_test" value="'.Tools::safeOutput(Configuration::get('CONEKTA_PRIVATE_KEY_TEST')).'" /></td>
 									<td width="15"></td>
 									<td width="15"></td>
-									<td align="left" valign="middle">'.$this->l('Live Private Key').'</td>
+									<td align="left" valign="middle"> Live Private Key </td>
 									<td align="left" valign="middle"><input type="password" name="conekta_private_key_live" value="'.Tools::safeOutput(Configuration::get('CONEKTA_PRIVATE_KEY_LIVE')).'" /></td>
 								</tr>
 							</table>
@@ -601,7 +598,7 @@ class ConektaTarjeta extends PaymentModule
             
 					$output .= '
 					<tr>
-						<td colspan="2" class="td-noborder save"><input type="submit" class="button" name="SubmitConekta" value="'.$this->l('Save Settings').'" /></td>
+						<td colspan="2" class="td-noborder save"><input type="submit" class="button" name="SubmitConekta" value="Save Settings" /></td>
 					</tr>
 				</table>
 			</fieldset>
