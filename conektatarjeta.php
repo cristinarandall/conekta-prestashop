@@ -153,7 +153,7 @@ class ConektaTarjeta extends PaymentModule
       return;
     if (!$this->checkSettings())
       return;
-    return '<div class="conekta-payment-errors”> '. $_GET["message"] .' </div> '. $this->fetchTemplate('payment.tpl');
+    return '<div class="conekta-payment-errors”> '. $_GET["message_to_purchaser"] .' </div> '. $this->fetchTemplate('payment.tpl');
   }
 
   public function hookAdminOrder($params)
@@ -249,6 +249,9 @@ class ConektaTarjeta extends PaymentModule
       $this->smarty->assign('conekta_order', array('reference' => isset($params['objOrder']->reference) ? $params['objOrder']->reference : '#'.sprintf('%06d', $params['objOrder']->id),
         'valid' => $params['objOrder']->valid));
     $currentOrderStatus = (int)$params['objOrder']->getCurrentState();
+
+    // PrestaShopLogger::addLog($params['objOrder']->valid);
+
     return $this->fetchTemplate('order-confirmation.tpl');
   }
 
@@ -318,8 +321,8 @@ class ConektaTarjeta extends PaymentModule
 
     if (!$token)
     {
-      if (version_compare(_PS_VERSION_, '1.4.0.3', '>') && class_exists('Logger'))
-        Logger::addLog($this->l('Conekta - Payment transaction failed.').' Message: A valid Conekta token was not provided', 3, null, 'Cart', (int)$this->context->cart->id, true);
+      if (version_compare(_PS_VERSION_, '1.4.0.3', '>') && class_exists('PrestaShopLogger'))
+        PrestaShopLogger::addLog($this->l('Conekta - Payment transaction failed.').' Message: A valid Conekta token was not provided', 3, null, 'Cart', (int)$this->context->cart->id, true);
       $controller = Configuration::get('PS_ORDER_PROCESS_TYPE') ? 'order-opc.php' : 'order.php';
       $location = $this->context->link->getPageLink($controller, true).(strpos($controller, '?') !== false ? '&' : '?').'step=3&conekta_error=1#conekta_error';
       Tools::redirectLink($location);
@@ -333,8 +336,19 @@ class ConektaTarjeta extends PaymentModule
     $customer = new Customer((int)$cart->id_customer);
     $address_delivery = new Address((int)$cart->id_address_delivery);
     $address_fiscal = new Address((int)$cart->id_address_invoice);
-    $country = $cart->country->id_zone;
+    
+    // get shipping info
+    $carrier = new Carrier((int)$cart->id_carrier);
+    $shipping_price = $cart->getTotalShippingCost() * 100;
+    $shipping_carrier = "other";
+    $shipping_service = "other";
 
+    if (isset($carrier)) {
+      $shipping_carrier = $carrier->name;
+      $shipping_service = implode(",", $carrier->delay);
+    }
+
+    // build line items
     $items = $cart->getProducts();
     $line_items = array();
     foreach ($items as $item) {
@@ -348,7 +362,6 @@ class ConektaTarjeta extends PaymentModule
                                                   )));
     }
     
-    //to do: add line_items
     try
     {
       $charge_details = array(
@@ -361,11 +374,15 @@ class ConektaTarjeta extends PaymentModule
           "name" => $customer->firstname . " " . $customer->lastname,
           "line_items" =>$line_items,
           "shipment"  => array(
+            "price" => $shipping_price,
+            "carrier" => $shipping_carrier,
+            "service" => $shipping_service,
             "address"=> array(
               "street1" => $address_delivery->address1,
-              "zip" => $address_delivery->postcode,
+              "city" => $address_delivery->city,
               "state"=> State::getNameById($address_delivery->id_state),
-              "city" => $address_delivery->city
+              "country" => $address_delivery->country,
+              "zip" => $address_delivery->postcode
             )             
           ),
           "billing_address"  => array(
@@ -375,6 +392,7 @@ class ConektaTarjeta extends PaymentModule
             "phone"=> $address_fiscal->phone,
             "state"=> State::getNameById($address_fiscal->id_state),
             "city" => $address_fiscal->city,
+            "country" => $address_fiscal->country,
           )
         ),
         'currency' => $this->context->currency->iso_code,
@@ -393,6 +411,9 @@ class ConektaTarjeta extends PaymentModule
       $this->l('Processed on:').' '.strftime('%Y-%m-%d %H:%M:%S', $charge_response->created_at)."\n".
       $this->l('Currency:').' '.Tools::strtoupper($charge_response->currency)."\n".
       $this->l('Mode:').' '.($charge_response->livemode == 'true' ? $this->l('Live') : $this->l('Test'))."\n";
+
+      PrestaShopLogger::addLog(print_r($order_status));
+
       $this->validateOrder((int)$this->context->cart->id, (int)$order_status, ($charge_response->amount * 0.01), $this->displayName, $message, array(), null, false, $this->context->customer->secure_key);
 
       if (version_compare(_PS_VERSION_, '1.5', '>='))
@@ -414,7 +435,7 @@ class ConektaTarjeta extends PaymentModule
         INSERT INTO '._DB_PREFIX_.'conekta_transaction (type, id_conekta_customer, id_cart, id_order,
         id_transaction, amount, status, currency, fee, mode, date_add, captured)
         VALUES (\'payment\', '.(isset($conekta_customer['id_conekta_customer']) ? (int)$conekta_customer['id_conekta_customer'] : 0).', '.(int)$this->context->cart->id.', '.(int)$this->currentOrder.', \''.pSQL($charge_response->id).'\',
-        \''.($charge_response->amount * 0.01).'\', \''.($charge_response->status == 'paid' ? 'paid' : 'unpaid').'\', \''.pSQL($charge_response->currency).'\', \''.($fee * 0.01).'\', \''.($charge_response->livemode == 'true' ? 'live' : 'test').'\', NOW(), \''.($charge_response->captured == 'true' ? '1' : '0').'\' )');
+        \''.($charge_response->amount * 0.01).'\', \''.($charge_response->status == 'paid' ? 'paid' : 'unpaid').'\', \''.pSQL($charge_response->currency).'\', \''.($charge_response->fee * 0.01).'\', \''.($charge_response->livemode == 'true' ? 'live' : 'test').'\', NOW(), true)');
 
       if (version_compare(_PS_VERSION_, '1.5', '<'))
         $redirect = 'order-confirmation.php?id_cart='.(int)$this->context->cart->id.'&id_module='.(int)$this->id.'&id_order='.(int)$this->currentOrder.'&key='.$this->context->customer->secure_key;
@@ -425,8 +446,8 @@ class ConektaTarjeta extends PaymentModule
     }
     catch (Conekta_Error $e) {
       $message = $e->message_to_purchaser;
-      if (version_compare(_PS_VERSION_, '1.4.0.3', '>') && class_exists('Logger'))
-        Logger::addLog($this->l('Payment transaction failed').' '.$message, 2, null, 'Cart', (int)$this->context->cart->id, true);
+      if (version_compare(_PS_VERSION_, '1.4.0.3', '>') && class_exists('§ger'))
+        PrestaShopLogger::addLog($this->l('Payment transaction failed').' '.$message, 2, null, 'Cart', (int)$this->context->cart->id, true);
 
       $controller = Configuration::get('PS_ORDER_PROCESS_TYPE') ? 'order-opc.php' : 'order.php';
       $location = $this->context->link->getPageLink($controller, true).(strpos($controller, '?') !== false ? '&' : '?').'step=3&conekta_error=1&message='. $message .' #conekta_error';
