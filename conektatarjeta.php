@@ -431,7 +431,7 @@ class ConektaTarjeta extends PaymentModule
         INSERT INTO '._DB_PREFIX_.'conekta_transaction (type, id_conekta_customer, id_cart, id_order,
         id_transaction, amount, status, currency, fee, mode, date_add, captured)
         VALUES (\'payment\', '.(isset($conekta_customer['id_conekta_customer']) ? (int)$conekta_customer['id_conekta_customer'] : 0).', '.(int)$this->context->cart->id.', '.(int)$this->currentOrder.', \''.pSQL($charge_response->id).'\',
-        \''.($charge_response->amount * 0.01).'\', \''.($charge_response->status == 'paid' ? 'paid' : 'unpaid').'\', \''.pSQL($charge_response->currency).'\', \''.($charge_response->fee * 0.01).'\', \''.($charge_response->livemode == 'true' ? 'live' : 'test').'\', NOW(), true)');
+        \''.($charge_response->amount * 0.01).'\', \''.($charge_response->status == 'paid' ? 'paid' : 'unpaid').'\', \''.pSQL($charge_response->currency).'\', \''.($charge_response->fee * 0.01).'\', \''.($charge_response->livemode == 'true' ? 'live' : 'test').'\', NOW(), \'1\')');
 
       if (version_compare(_PS_VERSION_, '1.5', '<'))
         $redirect = 'order-confirmation.php?id_cart='.(int)$this->context->cart->id.'&id_module='.(int)$this->id.'&id_order='.(int)$this->currentOrder.'&key='.$this->context->customer->secure_key;
@@ -442,7 +442,7 @@ class ConektaTarjeta extends PaymentModule
     }
     catch (Conekta_Error $e) {
       $message = $e->message_to_purchaser;
-      if (version_compare(_PS_VERSION_, '1.4.0.3', '>') && class_exists('§ger'))
+      if (version_compare(_PS_VERSION_, '1.4.0.3', '>') && class_exists('Logger'))
         Logger::addLog($this->l('Payment transaction failed').' '.$message, 2, null, 'Cart', (int)$this->context->cart->id, true);
 
       $controller = Configuration::get('PS_ORDER_PROCESS_TYPE') ? 'order-opc.php' : 'order.php';
