@@ -250,8 +250,6 @@ class ConektaTarjeta extends PaymentModule
         'valid' => $params['objOrder']->valid));
     $currentOrderStatus = (int)$params['objOrder']->getCurrentState();
 
-    // PrestaShopLogger::addLog($params['objOrder']->valid);
-
     return $this->fetchTemplate('order-confirmation.tpl');
   }
 
@@ -321,8 +319,8 @@ class ConektaTarjeta extends PaymentModule
 
     if (!$token)
     {
-      if (version_compare(_PS_VERSION_, '1.4.0.3', '>') && class_exists('PrestaShopLogger'))
-        PrestaShopLogger::addLog($this->l('Conekta - Payment transaction failed.').' Message: A valid Conekta token was not provided', 3, null, 'Cart', (int)$this->context->cart->id, true);
+      if (version_compare(_PS_VERSION_, '1.4.0.3', '>') && class_exists('Logger'))
+        Logger::addLog($this->l('Conekta - Payment transaction failed.').' Message: A valid Conekta token was not provided', 3, null, 'Cart', (int)$this->context->cart->id, true);
       $controller = Configuration::get('PS_ORDER_PROCESS_TYPE') ? 'order-opc.php' : 'order.php';
       $location = $this->context->link->getPageLink($controller, true).(strpos($controller, '?') !== false ? '&' : '?').'step=3&conekta_error=1#conekta_error';
       Tools::redirectLink($location);
@@ -412,8 +410,6 @@ class ConektaTarjeta extends PaymentModule
       $this->l('Currency:').' '.Tools::strtoupper($charge_response->currency)."\n".
       $this->l('Mode:').' '.($charge_response->livemode == 'true' ? $this->l('Live') : $this->l('Test'))."\n";
 
-      PrestaShopLogger::addLog(print_r($order_status));
-
       $this->validateOrder((int)$this->context->cart->id, (int)$order_status, ($charge_response->amount * 0.01), $this->displayName, $message, array(), null, false, $this->context->customer->secure_key);
 
       if (version_compare(_PS_VERSION_, '1.5', '>='))
@@ -447,7 +443,7 @@ class ConektaTarjeta extends PaymentModule
     catch (Conekta_Error $e) {
       $message = $e->message_to_purchaser;
       if (version_compare(_PS_VERSION_, '1.4.0.3', '>') && class_exists('§ger'))
-        PrestaShopLogger::addLog($this->l('Payment transaction failed').' '.$message, 2, null, 'Cart', (int)$this->context->cart->id, true);
+        Logger::addLog($this->l('Payment transaction failed').' '.$message, 2, null, 'Cart', (int)$this->context->cart->id, true);
 
       $controller = Configuration::get('PS_ORDER_PROCESS_TYPE') ? 'order-opc.php' : 'order.php';
       $location = $this->context->link->getPageLink($controller, true).(strpos($controller, '?') !== false ? '&' : '?').'step=3&conekta_error=1&message='. $message .' #conekta_error';
