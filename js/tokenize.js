@@ -57,13 +57,13 @@ var conektaSuccessResponseHandler = function(response) {
 
 var conektaErrorResponseHandler = function(response) {
     var $form = $('#conekta-payment-form');
-    $form.unblock();
+    //$form.unblock();
     
     if ($('.conekta-payment-errors').length)
         $('.conekta-payment-errors').fadeIn(1000);
     else
     {
-        $('#conekta-payment-form').prepend('<div class="conekta-payment-errors">' + response.message +'</div>');
+        $('#conekta-payment-form').prepend('<div class="conekta-payment-errors">' + response.message_to_purchaser +'</div>');
         $('.conekta-payment-errors').fadeIn(1000);
     }
     

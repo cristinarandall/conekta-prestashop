@@ -1,4 +1,7 @@
-<div class="payment_module" >
+
+{if $card == 1 }
+
+<div class="payment_module conekta-payment-module card-option" >
 	<h3 class="conekta_title">{l s='Pago con tarjeta de créditos y débito' mod='conektatarjeta'}</h3>
 
 	<div id="conekta-ajax-loader"><img src="{$module_dir|escape:'bellini':'UTF-8'}img/ajax-loader.gif" alt="" /> {l s='Transaction in progress, please wait.' mod='conektatarjeta'}</div>
@@ -32,6 +35,46 @@
 	</form>
 
 </div>
+{/if}
+
+{if $cash == 1}
+
+<div class="payment_module conekta-payment-module cash-option" >
+
+<h3 class="conekta_title">{l s='Pago en efectivo (Oxxo)' mod='conektatarjeta'}</h3>
+
+{* Classic Credit card form *}
+<div id="conekta-ajax-loader"><img src="{$module_dir|escape:'bellini':'UTF-8'}img/ajax-loader.gif" alt="" /> {l s='Transaction in progress, please wait.' mod='conektatarjeta'}</div>
+
+<form data-ajax="false" action="{$module_dir}charge.php" method="POST" id="conekta-cash-form">
+
+<input type="submit" value="{l s='Generar Ficha de Pago' mod='conektatarjeta'}" id="conekta-submit-button" class="{if $conekta_ps_version >= '1.5'}conekta-submit-button {/if}exclusive" data-icon="check" data-iconpos="right" data-theme="b" />
+
+</form>
+
+
+</div>
+
+{/if}
+
+{if $spei == 1 }
+
+<div class="payment_module conekta-payment-module spei-option" >
+
+<h3 class="conekta_title">{l s='Pago por medio de SPEI' mod='conektatarjeta'}</h3>
+
+{* Classic Credit card form *}
+<div id="conekta-ajax-loader"><img src="{$module_dir|escape:'bellini':'UTF-8'}img/ajax-loader.gif" alt="" /> {l s='Transaction in progress, please wait.' mod='conektatarjeta'}</div>
+
+<form data-ajax="false" action="{$module_dir}charge.php" method="POST" id="conekta-cash-form">
+
+<input type="submit" value="{l s='Generar Clabe para Realizar Pago' mod='conektatarjeta'}" id="conekta-submit-button" class="{if $conekta_ps_version >= '1.5'}conekta-submit-button {/if}exclusive" data-icon="check" data-iconpos="right" data-theme="b" />
+
+</form>
+
+</div>
+
+{/if}
 
 {literal}
 <script>
